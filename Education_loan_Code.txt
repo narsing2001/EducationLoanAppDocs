@@ -1,0 +1,2889 @@
+JWT documentation for Education Loan Management System
+------------------------------------------------------------------
+
+education-loan-auth-service/
+├── src/
+│   ├── main/
+│   │   ├── java/com/educationloan/
+│   │   │   ├── auth/
+│   │   │   │   ├── config/
+│   │   │   │   │   ├── JwtAuthenticationFilter.java
+│   │   │   │   │   ├── JwtTokenProvider.java
+│   │   │   │   │   ├── SecurityConfig.java
+│   │   │   │   │   └── CorsConfig.java
+│   │   │   │   ├── controller/
+│   │   │   │   │   └── AuthController.java
+│   │   │   │   ├── service/
+│   │   │   │   │   ├── AuthService.java
+│   │   │   │   │   ├── UserService.java
+│   │   │   │   │   └── RoleService.java
+│   │   │   │   ├── repository/
+│   │   │   │   │   ├── UserRepository.java
+│   │   │   │   │   └── RoleRepository.java
+│   │   │   │   ├── entity/
+│   │   │   │   │   ├── User.java
+│   │   │   │   │   ├── Role.java
+│   │   │   │   │   └── UserRole.java
+│   │   │   │   ├── dto/
+│   │   │   │   │   ├── LoginRequest.java
+│   │   │   │   │   ├── LoginResponse.java
+│   │   │   │   │   ├── RegisterRequest.java
+│   │   │   │   │   ├── JwtTokenResponse.java
+│   │   │   │   │   └── ErrorResponse.java
+│   │   │   │   ├── exception/
+│   │   │   │   │   ├── AuthenticationException.java
+│   │   │   │   │   ├── TokenExpiredException.java
+│   │   │   │   │   ├── UnauthorizedException.java
+│   │   │   │   │   └── GlobalExceptionHandler.java
+│   │   │   │   ├── util/
+│   │   │   │   │   └── JwtTokenUtil.java
+│   │   │   │   ├── annotation/
+│   │   │   │   │   └── RequireRole.java
+│   │   │   │   └── constant/
+│   │   │   │       └── RoleConstant.java
+│   │   │   ├── loan/
+│   │   │   │   ├── controller/
+│   │   │   │   │   └── LoanController.java
+│   │   │   │   ├── service/
+│   │   │   │   │   └── LoanService.java
+│   │   │   │   ├── entity/
+│   │   │   │   │   └── Loan.java
+│   │   │   │   └── repository/
+│   │   │   │       └── LoanRepository.java
+│   │   │   └── Application.java
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       └── application-dev.properties
+│   └── test/
+│       └── java/com/educationloan/
+│           └── auth/
+│               └── JwtTokenProviderTest.java
+├── pom.xml
+└── README.md
+----------------------------------------------------------------------------------------------------------
+1.POM.xml
+------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.educationloan</groupId>
+    <artifactId>education-loan-auth-service</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Education Loan Auth Service</name>
+    <description>JWT Authentication and Authorization Service for Education Loan Application</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.0</version>
+        <relativePath/>
+    </parent>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <jwt.version>0.12.3</jwt.version>
+        <lombok.version>1.18.30</lombok.version>
+    </properties>
+
+    <dependencies>
+        <!-- Spring Boot Starters -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Database -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+
+        <!-- JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jwt.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+====================================================================================================
+Constants and Annotations
+------------
+i)RoleConstant.java
+-->
+package com.educationloan.auth.constant;
+
+public class RoleConstant {
+    
+    public static final String ROLE_USER = "USER";
+    public static final String ROLE_EMPLOYEE = "EMPLOYEE";
+    public static final String ROLE_ADMIN = "ADMIN";
+    
+    public static final String ROLE_PREFIX = "ROLE_";
+    public static final String ROLE_USER_FULL = ROLE_PREFIX + ROLE_USER;
+    public static final String ROLE_EMPLOYEE_FULL = ROLE_PREFIX + ROLE_EMPLOYEE;
+    public static final String ROLE_ADMIN_FULL = ROLE_PREFIX + ROLE_ADMIN;
+}
+----------------------------------------
+ii)RequireRole.java
+---->
+package com.educationloan.auth.annotation;
+
+import java.lang.annotation.*;
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface RequireRole {
+    
+    String[] roles() default {};
+    
+    boolean requireAll() default false;
+}
+
+
+
+
+
+
+-----------------------------
+1)Entity Classes
+-----------------
+i)User.java
+---->
+package com.educationloan.auth.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
+import java.util.Set;
+
+@Entity
+@Table(name = "users")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(unique = true, nullable = false)
+    private String username;
+    
+    @Column(unique = true, nullable = false)
+    private String email;
+    
+    @Column(nullable = false)
+    private String password;
+    
+    @Column(nullable = false)
+    private String firstName;
+    
+    @Column(nullable = false)
+    private String lastName;
+    
+    @Column(nullable = false)
+    private Boolean isActive = true;
+    
+    @Column(nullable = false)
+    private Boolean isEmailVerified = false;
+    
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+    
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
+    
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+}
+-------------------------------------------------------------------------------------------------------
+2)Role.java
+---->
+package com.educationloan.auth.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "roles")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Role {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(unique = true, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RoleEnum name;
+    
+    @Column(length = 500)
+    private String description;
+    
+    public enum RoleEnum {
+        USER("User role for loan applicants"),
+        EMPLOYEE("Employee role for bank staff"),
+        ADMIN("Admin role for system administrators");
+        
+        private final String description;
+        
+        RoleEnum(String description) {
+            this.description = description;
+        }
+        
+        public String getDescription() {
+            return description;
+        }
+    }
+}
+-------------------------------------------------------------------------------------------
+iii)UserRole.java
+-->
+package com.educationloan.auth.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "user_roles")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class UserRole {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+}
+
+======================================================
+
+2)DTOs
+----->
+i)LoginRequest.java
+----->
+package com.educationloan.auth.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class LoginRequest {
+    
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
+    private String email;
+    
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
+    private String password;
+}
+---------------------------------------------------------------------------------------
+ii)LoginResponse.java
+---->
+package com.educationloan.auth.dto;
+
+import lombok.*;
+import java.util.Set;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class LoginResponse {
+    
+    private Long userId;
+    private String username;
+    private String email;
+    private String firstName;
+    private String lastName;
+    private String accessToken;
+    private String refreshToken;
+    private String tokenType;
+    private Long expiresIn;
+    private Set<String> roles;
+}
+-------------------------------------------------------------------------------------------
+iii)RegisterRequest.java
+----->
+package com.educationloan.auth.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class RegisterRequest {
+    
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    private String username;
+    
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
+    private String email;
+    
+    @NotBlank(message = "First name is required")
+    private String firstName;
+    
+    @NotBlank(message = "Last name is required")
+    private String lastName;
+    
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
+    private String password;
+    
+    @NotBlank(message = "Confirm password is required")
+    private String confirmPassword;
+}
+--------------------------------------------------------------------------------------------------------
+iV)JwtTokenResponse.java
+------>
+package com.educationloan.auth.dto;
+
+import lombok.*;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class JwtTokenResponse {
+    
+    private String accessToken;
+    private String refreshToken;
+    private String tokenType = "Bearer";
+    private Long expiresIn;
+}
+------------------------------------------------------------------------------------------------------
+V)ErrorResponse.java
+----->
+package com.educationloan.auth.dto;
+
+import lombok.*;
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ErrorResponse {
+    
+    private int statusCode;
+    private String message;
+    private String error;
+    private LocalDateTime timestamp;
+    private String path;
+}
+--------------------------------------------------
+vi)MessageResponse.java
+--->
+package com.educationloan.auth.dto;
+
+import lombok.*;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class MessageResponse {
+    
+    private String message;
+    private Boolean success;
+    private Object data;
+}
+
+=========================================================================================================
+Repositories
+--------------->
+1)UserRepository.java
+--->
+package com.educationloan.auth.repository;
+
+import com.educationloan.auth.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    
+    Optional<User> findByEmail(String email);
+    
+    Optional<User> findByUsername(String username);
+    
+    Boolean existsByEmail(String email);
+    
+    Boolean existsByUsername(String username);
+}
+---------------------------------------------------
+2)RoleRepository.java
+--->
+package com.educationloan.auth.repository;
+
+import com.educationloan.auth.entity.Role;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface RoleRepository extends JpaRepository<Role, Long> {
+    
+    Optional<Role> findByName(Role.RoleEnum name);
+}
+--------------------------------
+3)UserRoleRepository.java
+----->
+package com.educationloan.auth.repository;
+
+import com.educationloan.auth.entity.UserRole;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
+}
+==================================================
+
+
+
+
+
+
+
+JWT Configuration and Utilities
+---------------------------
+1)JwtTokenProvider.java
+------>
+package com.educationloan.auth.config;
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+import java.util.stream.Collectors;
+
+@Component
+@Slf4j
+public class JwtTokenProvider {
+    
+    @Value("${app.jwt.secret:mySecretKeyForEducationLoanApplicationWithJWTTokenAndMinimum256BitsForHS256Algorithm}")
+    private String jwtSecret;
+    
+    @Value("${app.jwt.expiration:86400000}") // 24 hours
+    private long jwtExpirationMs;
+    
+    @Value("${app.jwt.refresh-expiration:604800000}") // 7 days
+    private long refreshTokenExpirationMs;
+    
+    private SecretKey key;
+    
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        log.info("JWT Token Provider initialized");
+    }
+    /**
+     * Generate JWT Access Token from Authentication
+     */
+    public String generateAccessToken(Authentication authentication) {
+        String username = authentication.getName();
+        String roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+        
+        return createToken(username, roles, jwtExpirationMs);
+    }
+    
+    /**
+     * Generate JWT Refresh Token from Username
+     */
+    public String generateRefreshToken(String username) {
+        return createToken(username, "ROLE_REFRESH", refreshTokenExpirationMs);
+    }
+    
+    /**
+     * Create JWT Token
+     */
+    private String createToken(String username, String roles, long expirationMs) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationMs);
+        
+        return Jwts.builder()
+                .subject(username)
+                .claim("roles", roles)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+    }
+    
+    /**
+     * Get Username from JWT Token
+     */
+    public String getUsernameFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+    
+    /**
+     * Get Roles from JWT Token
+     */
+    public String getRolesFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("roles", String.class);
+    }
+    
+    /**
+     * Validate JWT Token
+     */
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (MalformedJwtException ex) {
+            log.error("Invalid JWT token: {}", ex.getMessage());
+        } catch (ExpiredJwtException ex) {
+            log.error("Expired JWT token: {}", ex.getMessage());
+        } catch (UnsupportedJwtException ex) {
+            log.error("Unsupported JWT token: {}", ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            log.error("JWT claims string is empty: {}", ex.getMessage());
+        }
+        return false;
+    }
+    
+    /**
+     * Check if Token is Expired
+     */
+    public boolean isTokenExpired(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+            return false;
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
+    }
+    
+    /**
+     * Get Token Expiration Time
+     */
+    public long getTokenExpirationTime(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getExpiration().getTime();
+    }
+}
+------------------------------------------------------------------------------------------------------
+2)JwtAuthenticationFilter.java
+------>
+package com.educationloan.auth.config;
+
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+@Slf4j
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    
+    public static final String BEARER_PREFIX = "Bearer ";
+    public static final String HEADER_AUTHORIZATION = "Authorization";
+    
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+    
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, 
+                                   HttpServletResponse response, 
+                                   FilterChain filterChain) throws ServletException, IOException {
+        try {
+            String jwt = getJwtFromRequest(request);
+            
+            if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
+                String username = jwtTokenProvider.getUsernameFromToken(jwt);
+                String rolesString = jwtTokenProvider.getRolesFromToken(jwt);
+                
+                // Parse roles and create authorities
+                List<SimpleGrantedAuthority> authorities = Arrays.stream(rolesString.split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+                
+                // Create authentication token
+                UsernamePasswordAuthenticationToken authentication = 
+                        new UsernamePasswordAuthenticationToken(username, null, authorities);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                
+                log.debug("Set the security context with JWT token for user: {}", username);
+            }
+        } catch (JwtException ex) {
+            log.error("JWT Token validation failed: {}", ex.getMessage());
+        } catch (Exception ex) {
+            log.error("Could not set user authentication in security context: {}", ex.getMessage());
+        }
+        
+        filterChain.doFilter(request, response);
+    }
+    
+    /**
+     * Extract JWT token from Authorization header
+     */
+    private String getJwtFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader(HEADER_AUTHORIZATION);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(BEARER_PREFIX.length());
+        }
+        return null;
+    }
+}
+----------------------------------------------------------------------------------------------------------
+3)SecurityConfig.java
+---->
+package com.educationloan.auth.config;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
+public class SecurityConfig {
+    
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+    
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .cors().and()
+                .csrf().disable()
+                .exceptionHandling()
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        response.sendError(401, "Unauthorized");
+                    })
+                    .accessDeniedHandler((request, response, accessDeniedException) -> {
+                        response.sendError(403, "Access Denied");
+                    })
+                .and()
+                .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeHttpRequests(authz -> authz
+                        // Public endpoints
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh-token").permitAll()
+                        
+                        // Admin endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasRole("ADMIN")
+                        
+                        // Employee endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/employee/**").hasAnyRole("EMPLOYEE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/employee/**").hasAnyRole("EMPLOYEE", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/employee/**").hasAnyRole("EMPLOYEE", "ADMIN")
+                        
+                        // User endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/user/**").hasAnyRole("USER", "EMPLOYEE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/user/**").hasAnyRole("USER", "EMPLOYEE", "ADMIN")
+                        
+                        // Loan endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/loans/**").hasAnyRole("USER", "EMPLOYEE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/loans/**").hasAnyRole("USER", "EMPLOYEE", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/loans/**").hasAnyRole("EMPLOYEE", "ADMIN")
+                        
+                        // Any other request must be authenticated
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        return http.build();
+    }
+}
+-----------------------------------------------------------------------------------------------------------
+3)CorsConfig.java
+---->
+package com.educationloan.auth.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.Collections;
+
+@Configuration
+public class CorsConfig {
+    
+       @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000", 
+                "http://localhost:4200",
+                "http://localhost:8080"
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Collections.singletonList("*"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+}
+================================================================================================
+
+Repositories
+--------------
+1)UserRepository.java
+---->
+package com.educationloan.auth.repository;
+
+import com.educationloan.auth.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    
+    Optional<User> findByEmail(String email);
+    
+    Optional<User> findByUsername(String username);
+    
+    Boolean existsByEmail(String email);
+    
+    Boolean existsByUsername(String username);
+}
+--------------------------------------------
+2)RoleRepository.java
+--->
+package com.educationloan.auth.repository;
+
+import com.educationloan.auth.entity.Role;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface RoleRepository extends JpaRepository<Role, Long> {
+    
+    Optional<Role> findByName(Role.RoleEnum name);
+}
+====================================================================
+
+
+Services
+============
+1)AuthService.java
+----->
+package com.educationloan.auth.service;
+
+import com.educationloan.auth.config.JwtTokenProvider;
+import com.educationloan.auth.dto.LoginRequest;
+import com.educationloan.auth.dto.LoginResponse;
+import com.educationloan.auth.dto.RegisterRequest;
+import com.educationloan.auth.entity.Role;
+import com.educationloan.auth.entity.User;
+import com.educationloan.auth.exception.AuthenticationException;
+import com.educationloan.auth.exception.UnauthorizedException;
+import com.educationloan.auth.repository.RoleRepository;
+import com.educationloan.auth.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
+@Service
+@Slf4j
+@Transactional
+public class AuthService {
+    
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private RoleRepository roleRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+    
+    /**
+     * Register new user
+     */
+    public LoginResponse register(RegisterRequest registerRequest) {
+        // Validate passwords match
+        if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+        
+        // Check if email already exists
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new IllegalArgumentException("Email is already registered");
+        }
+        
+        // Check if username already exists
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            throw new IllegalArgumentException("Username is already taken");
+        }
+        
+        // Create new user
+        User user = User.builder()
+                .username(registerRequest.getUsername())
+                .email(registerRequest.getEmail())
+                .firstName(registerRequest.getFirstName())
+                .lastName(registerRequest.getLastName())
+                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .isActive(true)
+                .isEmailVerified(false)
+                .build();
+        
+        // Assign USER role by default
+        Role userRole = roleRepository.findByName(Role.RoleEnum.USER)
+                .orElseThrow(() -> new RuntimeException("USER role not found"));
+        user.setRoles(new HashSet<>(Collections.singletonList(userRole)));
+        
+        User savedUser = userRepository.save(user);
+        log.info("User registered successfully: {}", savedUser.getEmail());
+        
+        // Generate tokens
+        return generateLoginResponse(savedUser, null, null);
+    }
+    
+    /**
+     * Login user
+     */
+    public LoginResponse login(LoginRequest loginRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword()
+                    )
+            );
+            
+            // Get user from database
+            User user = userRepository.findByEmail(loginRequest.getEmail())
+                    .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
+            
+            if (!user.getIsActive()) {
+                throw new UnauthorizedException("User account is inactive");
+            }
+            
+            String accessToken = jwtTokenProvider.generateAccessToken(authentication);
+            String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUsername());
+            
+            log.info("User logged in successfully: {}", user.getEmail());
+            
+            return generateLoginResponse(user, accessToken, refreshToken);
+            
+        } catch (AuthenticationException e) {
+            log.error("Login failed for email: {}", loginRequest.getEmail());
+            throw new UnauthorizedException("Invalid email or password");
+        }
+    }
+    
+    /**
+     * Refresh Access Token
+     */
+    public LoginResponse refreshToken(String refreshToken) {
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new UnauthorizedException("Invalid or expired refresh token");
+        }
+        
+        String username = jwtTokenProvider.getUsernameFromToken(refreshToken);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+        
+        // Create new authentication for token generation
+        UsernamePasswordAuthenticationToken auth = 
+                new UsernamePasswordAuthenticationToken(username, null);
+        
+        String newAccessToken = jwtTokenProvider.generateAccessToken(auth);
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(username);
+        
+        log.info("Token refreshed for user: {}", username);
+        
+        return generateLoginResponse(user, newAccessToken, newRefreshToken);
+    }
+    
+    /**
+     * Logout user (optional - can be implemented with token blacklisting)
+     */
+    public void logout(String username) {
+        log.info("User logged out: {}", username);
+        // Implement token blacklisting if needed
+    }
+    
+    /**
+     * Generate Login Response
+     */
+    private LoginResponse generateLoginResponse(User user, String accessToken, String refreshToken) {
+        long expirationTime = 86400000; // 24 hours
+        
+        return LoginResponse.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
+                .expiresIn(expirationTime / 1000) // Convert to seconds
+                .roles(user.getRoles().stream()
+                        .map(role -> role.getName().name())
+                        .collect(Collectors.toSet()))
+                .build();
+    }
+}
+----------------------------------------------------------------------------------------
+2)UserService.java
+----->
+package com.educationloan.auth.service;
+
+import com.educationloan.auth.entity.Role;
+import com.educationloan.auth.entity.User;
+import com.educationloan.auth.exception.UnauthorizedException;
+import com.educationloan.auth.repository.RoleRepository;
+import com.educationloan.auth.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+@Service
+@Slf4j
+@Transactional
+public class UserService {
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private RoleRepository roleRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+    /**
+     * Get user by email
+     */
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+    }
+    
+    /**
+     * Get user by username
+     */
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+    }
+    
+    /**
+     * Get user by ID
+     */
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+    }
+    
+    /**
+     * Assign role to user
+     */
+    public void assignRoleToUser(Long userId, Role.RoleEnum roleName) {
+        User user = getUserById(userId);
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+        
+        if (!user.getRoles().contains(role)) {
+            user.getRoles().add(role);
+            userRepository.save(user);
+            log.info("Role {} assigned to user: {}", roleName, user.getEmail());
+        }
+    }
+    
+    /**
+     * Remove role from user
+     */
+    public void removeRoleFromUser(Long userId, Role.RoleEnum roleName) {
+        User user = getUserById(userId);
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+        
+        user.getRoles().remove(role);
+        userRepository.save(user);
+        log.info("Role {} removed from user: {}", roleName, user.getEmail());
+    }
+    
+    /**
+     * Check if user is admin
+     */
+    public boolean isUserAdmin(Long userId) {
+        User user = getUserById(userId);
+        return user.getRoles().stream()
+                .anyMatch(role -> role.getName() == Role.RoleEnum.ADMIN);
+    }
+    
+    /**
+     * Check if user is employee
+     */
+    public boolean isUserEmployee(Long userId) {
+        User user = getUserById(userId);
+        return user.getRoles().stream()
+                .anyMatch(role -> role.getName() == Role.RoleEnum.EMPLOYEE);
+    }
+    
+    /**
+     * Check if user has specific role
+     */
+    public boolean hasRole(Long userId, Role.RoleEnum roleName) {
+        User user = getUserById(userId);
+        return user.getRoles().stream()
+                .anyMatch(role -> role.getName() == roleName);
+    }
+    
+    /**
+     * Activate user
+     */
+    public void activateUser(Long userId) {
+        User user = getUserById(userId);
+        user.setIsActive(true);
+        userRepository.save(user);
+        log.info("User activated: {}", user.getEmail());
+    }
+    
+    /**
+     * Deactivate user
+     */
+    public void deactivateUser(Long userId) {
+        User user = getUserById(userId);
+        user.setIsActive(false);
+        userRepository.save(user);
+        log.info("User deactivated: {}", user.getEmail());
+    }
+}
+-------------------------------
+3)RoleService.java
+------->
+package com.educationloan.auth.service;
+
+import com.educationloan.auth.entity.Role;
+import com.educationloan.auth.repository.RoleRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Slf4j
+@Transactional
+public class RoleService {
+    
+    @Autowired
+    private RoleRepository roleRepository;
+    
+    /**
+     * Get role by name
+     */
+    public Optional<Role> getRoleByName(Role.RoleEnum name) {
+        return roleRepository.findByName(name);
+    }
+    
+    /**
+     * Get all roles
+     */
+    public List<Role> getAllRoles() {
+        return roleRepository.findAll();
+    }
+    
+    /**
+     * Create or get role
+     */
+    public Role createOrGetRole(Role.RoleEnum name) {
+        Optional<Role> existingRole = roleRepository.findByName(name);
+        if (existingRole.isPresent()) {
+            return existingRole.get();
+        }
+        
+        Role newRole = Role.builder()
+                .name(name)
+                .description(name.getDescription())
+                .build();
+        return roleRepository.save(newRole);
+    }
+}
+==========================================================================================
+
+Controllers
+----->
+1)AuthController.java
+----->
+package com.educationloan.auth.controller;
+
+import com.educationloan.auth.dto.*;
+import com.educationloan.auth.service.AuthService;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/auth")
+@Slf4j
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:4200"})
+public class AuthController {
+    
+    @Autowired
+    private AuthService authService;
+    
+    /**
+     * Register endpoint
+     * POST /api/auth/register
+     */
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        try {
+            log.info("Registration request for email: {}", registerRequest.getEmail());
+            LoginResponse response = authService.register(registerRequest);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .message(e.getMessage())
+                    .error("Registration Error")
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("Registration error: {}", e.getMessage());
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Registration failed")
+                    .error(e.getMessage())
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Login endpoint
+     * POST /api/auth/login
+     */
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+        try {
+            log.info("Login request for email: {}", loginRequest.getEmail());
+            LoginResponse response = authService.login(loginRequest);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Login error: {}", e.getMessage());
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .statusCode(HttpStatus.UNAUTHORIZED.value())
+                    .message("Invalid email or password")
+                    .error(e.getMessage())
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
+    }
+    
+    /**
+     * Refresh Token endpoint
+     * POST /api/auth/refresh-token
+     */
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestBody JwtTokenResponse tokenRequest) {
+        try {
+            log.info("Token refresh request");
+            LoginResponse response = authService.refreshToken(tokenRequest.getRefreshToken());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Token refresh error: {}", e.getMessage());
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .statusCode(HttpStatus.UNAUTHORIZED.value())
+                    .message("Token refresh failed")
+                    .error(e.getMessage())
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
+    }
+    
+    /**
+     * Logout endpoint
+     * POST /api/auth/logout
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
+        try {
+            log.info("Logout request");
+            // Extract username from token and logout
+            authService.logout(token);
+            return new ResponseEntity<>(
+                    new MessageResponse("Logged out successfully"), 
+                    HttpStatus.OK
+            );
+        } catch (Exception e) {
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .message("Logout failed")
+                    .error(e.getMessage())
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+    
+    /**
+     * Validate Token endpoint
+     * GET /api/auth/validate
+     */
+    @GetMapping("/validate")
+    public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String token) {
+        if (token == null || !token.startsWith("Bearer ")) {
+            return new ResponseEntity<>(
+                    new MessageResponse("Invalid token format"), 
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+        
+        String jwtToken = token.substring(7);
+        // Validation logic will be handled by JwtAuthenticationFilter
+        return new ResponseEntity<>(
+                new MessageResponse("Token is valid"), 
+                HttpStatus.OK
+        );
+    }
+}
+---------------------
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
+class MessageResponse {
+    private String message;
+}
+-------------------------------------
+/*
+package com.educationloan.auth.controller;
+
+import com.educationloan.auth.dto.*;
+import com.educationloan.auth.service.AuthService;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/auth")
+@Slf4j
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:4200", "http://localhost:8080"})
+public class AuthController {
+    
+    @Autowired
+    private AuthService authService;
+    
+    /**
+     * Register endpoint - POST /api/auth/register
+     */
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        try {
+            log.info("Registration request for email: {}", registerRequest.getEmail());
+            LoginResponse response = authService.register(registerRequest);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .message(e.getMessage())
+                    .error("Registration Error")
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("Registration error: {}", e.getMessage());
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Registration failed")
+                    .error(e.getMessage())
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Login endpoint - POST /api/auth/login
+     */
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+        try {
+            log.info("Login request for email: {}", loginRequest.getEmail());
+            LoginResponse response = authService.login(loginRequest);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Login error: {}", e.getMessage());
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .statusCode(HttpStatus.UNAUTHORIZED.value())
+                    .message("Invalid email or password")
+                    .error(e.getMessage())
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
+    }
+    
+    /**
+     * Refresh Token endpoint - POST /api/auth/refresh-token
+     */
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestBody JwtTokenResponse tokenRequest) {
+        try {
+            log.info("Token refresh request");
+            LoginResponse response = authService.refreshToken(tokenRequest.getRefreshToken());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Token refresh error: {}", e.getMessage());
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .statusCode(HttpStatus.UNAUTHORIZED.value())
+                    .message("Token refresh failed")
+                    .error(e.getMessage())
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
+    }
+    
+    /**
+     * Validate Token endpoint - GET /api/auth/validate
+     */
+    @GetMapping("/validate")
+    public ResponseEntity<?> validateToken() {
+        return new ResponseEntity<>(
+                MessageResponse.builder()
+                        .message("Token is valid")
+                        .success(true)
+                        .build(), 
+                HttpStatus.OK
+        );
+    }
+    
+    /**
+     * Logout endpoint - POST /api/auth/logout
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String token) {
+        try {
+            log.info("Logout request");
+            authService.logout("user");
+            return new ResponseEntity<>(
+                    MessageResponse.builder()
+                            .message("Logged out successfully")
+                            .success(true)
+                            .build(), 
+                    HttpStatus.OK
+            );
+        } catch (Exception e) {
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .message("Logout failed")
+                    .error(e.getMessage())
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+    
+    /**
+     * Health check endpoint
+     */
+    @GetMapping("/health")
+    public ResponseEntity<?> health() {
+        return new ResponseEntity<>(
+                MessageResponse.builder()
+                        .message("Auth service is running")
+                        .success(true)
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+}
+*/
+------------------------------------------------------------------
+
+
+
+2)LoanController.java (Example with Role-Based Permissions)
+------->
+package com.educationloan.loan.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/loans")
+@Slf4j
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:4200"})
+public class LoanController {
+    
+    /**
+     * USER - Get their own loan applications
+     * EMPLOYEE - View assigned loan applications
+     * ADMIN - View all loan applications
+	 * Get all loans - USER, EMPLOYEE, ADMIN
+     * GET /api/loans
+     */
+    @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'EMPLOYEE', 'ADMIN')")
+    public ResponseEntity<?> getAllLoans(Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            String roles = authentication.getAuthorities().toString();
+            
+            log.info("User: {} with roles: {} is fetching loans", username, roles);
+            
+            // Implement logic based on roles
+            if (authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                // Return all loans
+                return new ResponseEntity<>("Admin viewing all loans", HttpStatus.OK);
+            } else if (authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_EMPLOYEE"))) {
+                // Return assigned loans
+                return new ResponseEntity<>("Employee viewing assigned loans", HttpStatus.OK);
+            } else {
+                // Return user's own loans
+                return new ResponseEntity<>("User viewing their own loans", HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            log.error("Error fetching loans: {}", e.getMessage());
+            return new ResponseEntity<>("Error fetching loans", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+	 * Create loan - USER, EMPLOYEE, ADMIN
+     * POST /api/loans
+     * USER - Apply for a loan
+     * EMPLOYEE, ADMIN - Create loans for users
+     */
+    @PostMapping
+    @PreAuthorize("hasAnyRole('USER', 'EMPLOYEE', 'ADMIN')")
+    public ResponseEntity<?> createLoan(@RequestBody Object loanRequest, 
+                                        Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            log.info("Loan application created by: {}", username);
+            return new ResponseEntity<>("Loan application created", HttpStatus.CREATED);
+        } catch (Exception e) {
+            log.error("Error creating loan: {}", e.getMessage());
+            return new ResponseEntity<>("Error creating loan", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Get loan by ID - All roles can access
+	 * Get loan by ID - USER, EMPLOYEE, ADMIN
+     * GET /api/loans/{loanId}
+     */
+    @GetMapping("/{loanId}")
+    @PreAuthorize("hasAnyRole('USER', 'EMPLOYEE', 'ADMIN')")
+    public ResponseEntity<?> getLoanById(@PathVariable Long loanId, 
+                                         Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            log.info("User: {} is fetching loan: {}", username, loanId);
+            return new ResponseEntity<>("Loan details", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error fetching loan: {}", e.getMessage());
+            return new ResponseEntity<>("Loan not found", HttpStatus.NOT_FOUND);
+        }
+    }
+    
+    /**
+     * Update loan - EMPLOYEE and ADMIN only
+	 * Update loan - EMPLOYEE, ADMIN
+     * PUT /api/loans/{loanId}
+     */
+    @PutMapping("/{loanId}")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN')")
+    public ResponseEntity<?> updateLoan(@PathVariable Long loanId, 
+                                        @RequestBody Object loanRequest,
+                                        Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            log.info("User: {} is updating loan: {}", username, loanId);
+            return new ResponseEntity<>("Loan updated successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error updating loan: {}", e.getMessage());
+            return new ResponseEntity<>("Error updating loan", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Approve loan - ADMIN only
+	 * Approve loan - ADMIN only
+     * POST /api/loans/{loanId}/approve
+     */
+    @PostMapping("/{loanId}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> approveLoan(@PathVariable Long loanId,
+                                        Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            log.info("Admin: {} is approving loan: {}", username, loanId);
+            return new ResponseEntity<>("Loan approved successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error approving loan: {}", e.getMessage());
+            return new ResponseEntity<>("Error approving loan", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Reject loan - ADMIN and EMPLOYEE
+	 * Reject loan - EMPLOYEE, ADMIN
+     * POST /api/loans/{loanId}/reject
+     */
+    @PostMapping("/{loanId}/reject")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN')")
+    public ResponseEntity<?> rejectLoan(@PathVariable Long loanId,
+                                        @RequestBody Object rejectionReason,
+                                        Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            log.info("User: {} is rejecting loan: {}", username, loanId);
+            return new ResponseEntity<>("Loan rejected successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error rejecting loan: {}", e.getMessage());
+            return new ResponseEntity<>("Error rejecting loan", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Delete loan - ADMIN only
+	 * Delete loan - ADMIN only
+     * DELETE /api/loans/{loanId}
+     */
+    @DeleteMapping("/{loanId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteLoan(@PathVariable Long loanId,
+                                        Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            log.info("Admin: {} is deleting loan: {}", username, loanId);
+            return new ResponseEntity<>("Loan deleted successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error deleting loan: {}", e.getMessage());
+            return new ResponseEntity<>("Error deleting loan", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+}
+------------------------------------------------
+3)AdminController.java
+--->
+package com.educationloan.admin.controller;
+
+import com.educationloan.auth.entity.Role;
+import com.educationloan.auth.entity.User;
+import com.educationloan.auth.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/admin")
+@Slf4j
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:4200", "http://localhost:8080"})
+public class AdminController {
+    
+    @Autowired
+    private UserService userService;
+    
+    /**
+     * Get all users - ADMIN only
+     * GET /api/admin/users
+     */
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllUsers(Authentication authentication) {
+        try {
+            String adminName = authentication.getName();
+            log.info("Admin: {} is fetching all users", adminName);
+            return new ResponseEntity<>("All users data", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error fetching users: {}", e.getMessage());
+            return new ResponseEntity<>("Error fetching users", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Get user by ID - ADMIN only
+     * GET /api/admin/users/{userId}
+     */
+    @GetMapping("/users/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getUserById(@PathVariable Long userId,
+                                        Authentication authentication) {
+        try {
+            String adminName = authentication.getName();
+            User user = userService.getUserById(userId);
+            log.info("Admin: {} is fetching user: {}", adminName, user.getEmail());
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error fetching user: {}", e.getMessage());
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
+    }
+    
+    /**
+     * Assign role to user - ADMIN only
+     * POST /api/admin/users/{userId}/assign-role
+     */
+    @PostMapping("/users/{userId}/assign-role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> assignRoleToUser(@PathVariable Long userId,
+                                             @RequestParam String roleName,
+                                             Authentication authentication) {
+        try {
+            String adminName = authentication.getName();
+            Role.RoleEnum role = Role.RoleEnum.valueOf(roleName);
+            userService.assignRoleToUser(userId, role);
+            log.info("Admin: {} assigned role: {} to user: {}", adminName, roleName, userId);
+            return new ResponseEntity<>("Role assigned successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error assigning role: {}", e.getMessage());
+            return new ResponseEntity<>("Error assigning role", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Remove role from user - ADMIN only
+     * DELETE /api/admin/users/{userId}/remove-role
+     */
+    @DeleteMapping("/users/{userId}/remove-role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> removeRoleFromUser(@PathVariable Long userId,
+                                               @RequestParam String roleName,
+                                               Authentication authentication) {
+        try {
+            String adminName = authentication.getName();
+            Role.RoleEnum role = Role.RoleEnum.valueOf(roleName);
+            userService.removeRoleFromUser(userId, role);
+            log.info("Admin: {} removed role: {} from user: {}", adminName, roleName, userId);
+            return new ResponseEntity<>("Role removed successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error removing role: {}", e.getMessage());
+            return new ResponseEntity<>("Error removing role", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Activate user - ADMIN only
+     * POST /api/admin/users/{userId}/activate
+     */
+    @PostMapping("/users/{userId}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> activateUser(@PathVariable Long userId,
+                                         Authentication authentication) {
+        try {
+            String adminName = authentication.getName();
+            userService.activateUser(userId);
+            log.info("Admin: {} activated user: {}", adminName, userId);
+            return new ResponseEntity<>("User activated successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error activating user: {}", e.getMessage());
+            return new ResponseEntity<>("Error activating user", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Deactivate user - ADMIN only
+     * POST /api/admin/users/{userId}/deactivate
+     */
+    @PostMapping("/users/{userId}/deactivate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deactivateUser(@PathVariable Long userId,
+                                           Authentication authentication) {
+        try {
+            String adminName = authentication.getName();
+            userService.deactivateUser(userId);
+            log.info("Admin: {} deactivated user: {}", adminName, userId);
+            return new ResponseEntity<>("User deactivated successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error deactivating user: {}", e.getMessage());
+            return new ResponseEntity<>("Error deactivating user", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+}
+
+===================================================================================================
+
+Exception Handling
+----------------------
+1)Custom Exceptions
+------------
+i)AuthenticationException.java
+---->
+package com.educationloan.auth.exception;
+
+public class AuthenticationException extends RuntimeException {
+    public AuthenticationException(String message) {
+        super(message);
+    }
+    
+    public AuthenticationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+-----------------------------------------
+ii)TokenExpiredException.java
+------>
+package com.educationloan.auth.exception;
+
+public class TokenExpiredException extends RuntimeException {
+    public TokenExpiredException(String message) {
+        super(message);
+    }
+}
+------------------------------------------
+iii)UnauthorizedException.java
+---->
+package com.educationloan.auth.exception;
+
+public class UnauthorizedException extends RuntimeException {
+    public UnauthorizedException(String message) {
+        super(message);
+    }
+    
+    public UnauthorizedException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+====================================================
+GlobalExceptionHandler.java
+--------->
+package com.educationloan.auth.exception;
+
+import com.educationloan.auth.dto.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler {
+    
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(
+            UnauthorizedException ex,
+            HttpServletRequest request) {
+        log.error("Unauthorized: {}", ex.getMessage());
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                .message(ex.getMessage())
+                .error("Unauthorized")
+                .timestamp(LocalDateTime.now())
+                .path(request.getRequestURI())
+                .build();
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+    
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleTokenExpiredException(
+            TokenExpiredException ex,
+            HttpServletRequest request) {
+        log.error("Token Expired: {}", ex.getMessage());
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                .message(ex.getMessage())
+                .error("Token Expired")
+                .timestamp(LocalDateTime.now())
+                .path(request.getRequestURI())
+                .build();
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+    
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(
+            AuthenticationException ex,
+            HttpServletRequest request) {
+        log.error("Authentication Error: {}", ex.getMessage());
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                .message(ex.getMessage())
+                .error("Authentication Error")
+                .timestamp(LocalDateTime.now())
+                .path(request.getRequestURI())
+                .build();
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+    
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+            IllegalArgumentException ex,
+            HttpServletRequest request) {
+        log.error("Illegal Argument: {}", ex.getMessage());
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .error("Bad Request")
+                .timestamp(LocalDateTime.now())
+                .path(request.getRequestURI())
+                .build();
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+        log.error("Validation Error: {}", ex.getMessage());
+        
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("statusCode", HttpStatus.BAD_REQUEST.value());
+        response.put("message", "Validation failed");
+        response.put("errors", errors);
+        response.put("timestamp", LocalDateTime.now());
+        response.put("path", request.getRequestURI());
+        
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+    
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGlobalException(
+            Exception ex,
+            HttpServletRequest request) {
+        log.error("Internal Server Error: {}", ex.getMessage(), ex);
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message("An unexpected error occurred")
+                .error(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .path(request.getRequestURI())
+                .build();
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+=======================================================================================================
+Application Configuration
+------------
+i)application.properties
+------->
+# Server Configuration
+server.port=8080
+server.servlet.context-path=/
+
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/education_loan_db
+spring.datasource.username=root
+spring.datasource.password=your_password
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA/Hibernate Configuration
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+
+# Logging Configuration
+logging.level.root=INFO
+logging.level.com.educationloan=DEBUG
+logging.level.org.springframework.security=DEBUG
+
+# JWT Configuration
+app.jwt.secret=mySecretKeyForEducationLoanApplicationWithJWTTokenAndMinimum256BitsForHS256Algorithm
+app.jwt.expiration=86400000
+app.jwt.refresh-expiration=604800000
+
+# Connection Pool
+spring.datasource.hikari.maximum-pool-size=10
+spring.datasource.hikari.minimum-idle=5
+
+# Application Name
+spring.application.name=Education Loan Auth Service
+---------------------------------------------------------------------------------------------------------
+Main Application Class
+---->
+i)Application.java
+--->
+package com.educationloan;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication
+public class Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+-----------------------------------------------------------------------------------
+API Testing Examples
+cURL Commands for Testing
+--->
+#!/bin/bash
+
+# 1. Register User
+echo "=== Registering User ==="
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "john_doe",
+    "email": "john@example.com",
+    "firstName": "John",
+    "lastName": "Doe",
+    "password": "password123",
+    "confirmPassword": "password123"
+  }'
+
+# 2. Login User
+echo -e "\n\n=== Login User ==="
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "password123"
+  }'
+
+# 3. Get Loans (with JWT token)
+echo -e "\n\n=== Get Loans ==="
+curl -X GET http://localhost:8080/api/loans \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN_HERE"
+
+# 4. Create Loan
+echo -e "\n\n=== Create Loan ==="
+curl -X POST http://localhost:8080/api/loans \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN_HERE" \
+  -d '{
+    "amount": 500000,
+    "tenure": 5,
+    "institution": "XYZ University"
+  }'
+
+# 5. Approve Loan (Admin only)
+echo -e "\n\n=== Approve Loan (Admin) ==="
+curl -X POST http://localhost:8080/api/loans/1/approve \
+  -H "Authorization: Bearer ADMIN_TOKEN_HERE"
+
+# 6. Refresh Token
+echo -e "\n\n=== Refresh Token ==="
+curl -X POST http://localhost:8080/api/auth/refresh-token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "YOUR_REFRESH_TOKEN_HERE"
+  }'
+-----------------------------------------------------------------------------------------------------
+
+Database Setup
+SQL Script
+-----------------------
+-->
+
+-- Create Database
+CREATE DATABASE IF NOT EXISTS education_loan_db;
+USE education_loan_db;
+
+-- Create Roles Table
+CREATE TABLE IF NOT EXISTS roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(500)
+) ENGINE=InnoDB;
+
+-- Insert Default Roles
+INSERT INTO roles (name, description) VALUES 
+('USER', 'User role for loan applicants'),
+('EMPLOYEE', 'Employee role for bank staff'),
+('ADMIN', 'Admin role for system administrators');
+
+-- Create Users Table
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    is_email_verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_email (email),
+    INDEX idx_username (username)
+) ENGINE=InnoDB;
+
+-- Create User_Roles Junction Table
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Create Loans Table (Optional)
+CREATE TABLE IF NOT EXISTS loans (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    loan_amount DECIMAL(15,2) NOT NULL,
+    tenure INT NOT NULL,
+    interest_rate DECIMAL(5,2),
+    status VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id)
+) ENGINE=InnoDB;\
+====================================================================================================
+Running the Application(run-application.sh)
+--->
+# 1. Clone or create project
+# 2. Navigate to project directory
+cd education-loan-auth-service
+
+# 3. Build the project
+mvn clean install
+
+# 4. Run the application
+mvn spring-boot:run
+
+# Or run as JAR
+java -jar target/education-loan-auth-service-1.0.0.jar
+------------------------------------------------------------------------
+
+
+
+
+1)Schema.sql
+=================
+-- Create Database
+CREATE DATABASE IF NOT EXISTS education_loan_db;
+USE education_loan_db;
+
+-- Create Roles Table
+CREATE TABLE IF NOT EXISTS roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create Users Table
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    is_email_verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_email (email),
+    INDEX idx_username (username),
+    INDEX idx_is_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create User_Roles Junction Table
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_role_id (role_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create Loans Table (Optional)
+CREATE TABLE IF NOT EXISTS loans (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    loan_amount DECIMAL(15,2) NOT NULL,
+    tenure INT NOT NULL,
+    interest_rate DECIMAL(5,2),
+    status VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+--------------------------------------------------
+
+2)data.sql
+---->
+-- Insert Default Roles
+INSERT IGNORE INTO roles (id, name, description) VALUES 
+(1, 'USER', 'User role for loan applicants'),
+(2, 'EMPLOYEE', 'Employee role for bank staff'),
+(3, 'ADMIN', 'Admin role for system administrators');
+
+-- Insert Sample Admin User (password: admin123)
+INSERT IGNORE INTO users (id, username, email, password, first_name, last_name, is_active, is_email_verified) VALUES 
+(1, 'admin', 'admin@educationloan.com', '$2a$10$slYQmyNdGzin7olVN3/p2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUe', 'Admin', 'User', TRUE, TRUE);
+
+-- Assign Admin Role to Admin User
+INSERT IGNORE INTO user_roles (user_id, role_id) VALUES 
+(1, 3);
+------------------------------------
+3)README.md
+----->
+# Education Loan Authentication & Authorization Service
+
+Complete Spring Boot JWT authentication and authorization service for Education Loan Application with role-based access control.
+
+## Features
+
+✅ JWT Token-based Authentication  
+✅ Role-Based Authorization (USER, EMPLOYEE, ADMIN)  
+✅ Secure Password Encryption (BCrypt)  
+✅ Refresh Token Support  
+✅ CORS Configuration  
+✅ Input Validation  
+✅ Global Exception Handling  
+✅ Role Assignment Management  
+✅ User Activation/Deactivation  
+✅ Production-Ready Code  
+
+## Roles
+
+- **USER**: Loan applicants who can apply for loans
+- **EMPLOYEE**: Bank staff who can view and process loans
+- **ADMIN**: System administrators with full control
+
+## API Endpoints
+
+### Authentication Endpoints
+
+#### 1. Register User
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "password": "password123",
+  "confirmPassword": "password123"
+}
+```
+
+**Response:**
+```json
+{
+  "userId": 1,
+  "username": "john_doe",
+  "email": "john@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "accessToken": "eyJhbGciOiJIUzUxMiJ9...",
+  "refreshToken": "eyJhbGciOiJIUzUxMiJ9...",
+  "tokenType": "Bearer",
+  "expiresIn": 86400,
+  "roles": ["USER"]
+}
+```
+
+#### 2. Login User
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+
+#### 3. Refresh Token
+```http
+POST /api/auth/refresh-token
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzUxMiJ9..."
+}
+```
+
+#### 4. Validate Token
+```http
+GET /api/auth/validate
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9...
+```
+
+#### 5. Logout
+```http
+POST /api/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9...
+```
+
+### Loan Endpoints
+
+#### 1. Get All Loans (USER, EMPLOYEE, ADMIN)
+```http
+GET /api/loans
+Authorization: Bearer {accessToken}
+```
+
+#### 2. Create Loan (USER, EMPLOYEE, ADMIN)
+```http
+POST /api/loans
+Authorization: Bearer {accessToken}
+Content-Type: application/json
+
+{
+  "amount": 500000,
+  "tenure": 5,
+  "institution": "XYZ University"
+}
+```
+
+#### 3. Get Loan by ID (USER, EMPLOYEE, ADMIN)
+```http
+GET /api/loans/{loanId}
+Authorization: Bearer {accessToken}
+```
+
+#### 4. Update Loan (EMPLOYEE, ADMIN)
+```http
+PUT /api/loans/{loanId}
+Authorization: Bearer {accessToken}
+Content-Type: application/json
+```
+
+#### 5. Approve Loan (ADMIN)
+```http
+POST /api/loans/{loanId}/approve
+Authorization: Bearer {adminToken}
+```
+
+#### 6. Reject Loan (EMPLOYEE, ADMIN)
+```http
+POST /api/loans/{loanId}/reject
+Authorization: Bearer {accessToken}
+Content-Type: application/json
+
+{
+  "reason": "Incomplete documents"
+}
+```
+
+#### 7. Delete Loan (ADMIN)
+```http
+DELETE /api/loans/{loanId}
+Authorization: Bearer {adminToken}
+```
+
+### Admin Endpoints
+
+#### 1. Get All Users (ADMIN)
+```http
+GET /api/admin/users
+Authorization: Bearer {adminToken}
+```
+
+#### 2. Get User by ID (ADMIN)
+```http
+GET /api/admin/users/{userId}
+Authorization: Bearer {adminToken}
+```
+
+#### 3. Assign Role to User (ADMIN)
+```http
+POST /api/admin/users/{userId}/assign-role?roleName=EMPLOYEE
+Authorization: Bearer {adminToken}
+```
+
+#### 4. Remove Role from User (ADMIN)
+```http
+DELETE /api/admin/users/{userId}/remove-role?roleName=EMPLOYEE
+Authorization: Bearer {adminToken}
+```
+
+#### 5. Activate User (ADMIN)
+```http
+POST /api/admin/users/{userId}/activate
+Authorization: Bearer {adminToken}
+```
+
+#### 6. Deactivate User (ADMIN)
+```http
+POST /api/admin/users/{userId}/deactivate
+Authorization: Bearer {adminToken}
+```
+
+## Setup Instructions
+
+### Prerequisites
+- Java 17 or higher
+- MySQL 8.0 or higher
+- Maven 3.6+
+
+### Installation Steps
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/yourusername/education-loan-auth-service.git
+cd education-loan-auth-service
+```
+
+2. **Create MySQL Database**
+```bash
+mysql -u root -p < schema.sql
+mysql -u root -p education_loan_db < data.sql
+```
+
+3. **Update application.properties**
+```properties
+spring.datasource.username=your_mysql_username
+spring.datasource.password=your_mysql_password
+app.jwt.secret=your_secret_key_minimum_256_bits
+```
+
+4. **Build the project**
+```bash
+mvn clean install
+```
+
+5. **Run the application**
+```bash
+mvn spring-boot:run
+```
+
+Or run as JAR:
+```bash
+java -jar target/education-loan-auth-service-1.0.0.jar
+```
+
+The application will start on http://localhost:8080
+
+## Testing with cURL
+
+### Register a new user
+```bash
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "john_doe",
+    "email": "john@example.com",
+    "firstName": "John",
+    "lastName": "Doe",
+    "password": "password123",
+    "confirmPassword": "password123"
+  }'
+```
+
+### Login
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "password123"
+  }'
+```
+
+### Access Protected Endpoint
+```bash
+curl -X GET http://localhost:8080/api/loans \
+  -H "Authorization: Bearer {accessToken}"
+```
+
+## Default Admin Credentials
+
+- **Email**: admin@educationloan.com
+- **Password**: admin123
+- **Role**: ADMIN
+
+## JWT Token Structure
+
+Header:
+```json
+{
+  "alg": "HS512",
+  "typ": "JWT"
+}
+```
+
+Payload:
+```json
+{
+  "sub": "username",
+  "roles": "ROLE_USER,ROLE_EMPLOYEE",
+  "iat": 1672531200,
+  "exp": 1672617600
+}
+```
+
+## Security Features
+
+- ✅ Password encryption using BCrypt
+- ✅ JWT token-based stateless authentication
+- ✅ CORS enabled for frontend integration
+- ✅ Role-based authorization with @PreAuthorize
+- ✅ Input validation with Jakarta Bean Validation
+- ✅ Global exception handling
+- ✅ Secure token refresh mechanism
+- ✅ Session-less architecture
+
+## Configuration
+
+### JWT Settings (application.properties)
+```properties
+app.jwt.secret=your_256_bit_secret_key
+app.jwt.expiration=86400000 # 24 hours in milliseconds
+app.jwt.refresh-expiration=604800000 # 7 days in milliseconds
+```
+
+### Database Settings
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/education_loan_db
+spring.datasource.username=root
+spring.datasource.password=your_password
+```
+
+### CORS Settings (CorsConfig.java)
+```java
+configuration.setAllowedOrigins(Arrays.asList(
+    "http://localhost:3000",
+    "http://localhost:4200"
+));
+```
+
+## Project Structure
+
+```
+education-loan-auth-service/
+├── src/
+│   ├── main/
+│   │   ├── java/com/educationloan/
+│   │   │   ├── auth/
+│   │   │   │   ├── config/
+│   │   │   │   ├── controller/
+│   │   │   │   ├── service/
+│   │   │   │   ├── repository/
+│   │   │   │   ├── entity/
+│   │   │   │   ├── dto/
+│   │   │   │   ├── exception/
+│   │   │   │   ├── annotation/
+│   │   │   │   └── constant/
+│   │   │   ├── loan/
+│   │   │   ├── admin/
+│   │   │   └── Application.java
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       ├── schema.sql
+│   │       └── data.sql
+│   └── test/
+└── pom.xml
+```
+
+## Error Handling
+
+The application provides consistent error responses:
+
+```json
+{
+  "statusCode": 401,
+  "message": "Invalid email or password",
+  "error": "Unauthorized",
+  "timestamp": "2024-01-15T10:30:00",
+  "path": "/api/auth/login"
+}
+```
+
+## Common HTTP Status Codes
+
+- `200 OK` - Request successful
+- `201 Created` - Resource created successfully
+- `400 Bad Request` - Invalid input
+- `401 Unauthorized` - Authentication failed
+- `403 Forbidden` - Access denied
+- `404 Not Found` - Resource not found
+- `500 Internal Server Error` - Server error
+
+## Development Notes
+
+1. **Adding New Endpoints with Role Protection**
+```java
+@PostMapping
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<?> createEntity() {
+    // Implementation
+}
+```
+
+2. **Checking User Roles Programmatically**
+```java
+authentication.getAuthorities()
+    .stream()
+    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))
+```
+
+3. **Getting Current User**
+```java
+String username = authentication.getName();
+User user = userService.getUserByEmail(username);
+```
+
+## License
+
+This project is licensed under the MIT License - see LICENSE file for details.
+
+## Support
+
+For issues and questions, please create an issue in the repository or contact the development team.
+
+## Contributors
+
+- Your Name (your.email@example.com)
+
+---
+
+**Last Updated**: January 2024  
+**Version**: 1.0.0
+--------------------------------------------------
+Testing File
+JwtTokenProviderTest.java
+------->
+package com.educationloan.auth.config;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class JwtTokenProviderTest {
+    
+    private JwtTokenProvider jwtTokenProvider;
+    private String testSecret = "testSecretKeyForEducationLoanApplicationWithJWTTokenAndMinimum256BitsForHS256Algorithm";
+    
+    @BeforeEach
+    void setUp() {
+        jwtTokenProvider = new JwtTokenProvider();
+        jwtTokenProvider.jwtSecret = testSecret;
+        jwtTokenProvider.jwtExpirationMs = 86400000;
+        jwtTokenProvider.refreshTokenExpirationMs = 604800000;
+        jwtTokenProvider.init();
+    }
+    
+    @Test
+    void testGenerateAccessToken() {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                "testuser", 
+                null, 
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+        
+        String token = jwtTokenProvider.generateAccessToken(authentication);
+        assertNotNull(token);
+        assertFalse(token.isEmpty());
+    }
+    
+    @Test
+    void testGenerateRefreshToken() {
+        String token = jwtTokenProvider.generateRefreshToken("testuser");
+        assertNotNull(token);
+        assertFalse(token.isEmpty());
+    }
+    
+    @Test
+    void testValidateToken() {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                "testuser", 
+                null, 
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+        
+        String token = jwtTokenProvider.generateAccessToken(authentication);
+        assertTrue(jwtTokenProvider.validateToken(token));
+    }
+    
+    @Test
+    void testGetUsernameFromToken() {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                "testuser", 
+                null, 
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+        
+        String token = jwtTokenProvider.generateAccessToken(authentication);
+        String username = jwtTokenProvider.getUsernameFromToken(token);
+        assertEquals("testuser", username);
+    }
+}
+------------------------------------------
+Build and Run Instructions
+Using Command Line
+----->
+#!/bin/bash
+
+# Step 1: Navigate to project directory
+cd education-loan-auth-service
+
+# Step 2: Clean and build
+mvn clean install -DskipTests
+
+# Step 3: Run the application
+mvn spring-boot:run
+
+# Or run as JAR
+# java -jar target/education-loan-auth-service-1.0.0.jar
